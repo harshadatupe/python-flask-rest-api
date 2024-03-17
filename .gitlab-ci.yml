@@ -24,7 +24,7 @@ build:
         IMAGE_TAG: python-app-3.0
     script:
         - docker build -t $IMAGE_NAME:$IMAGE_TAG .
-        - docker run -d -p 5005:5000 $IMAGE_NAME:$IMAGE_TAG
+        - docker run -p 5005:5000 $IMAGE_NAME:$IMAGE_TAG
 
 # run:
 #     stage: run
