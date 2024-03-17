@@ -23,11 +23,19 @@ build:
         DOCKER_TLS_CERTDIR: "/certs"
         IMAGE_NAME: harshadat/flask-rest-api
         IMAGE_TAG: python-app-3.0
+        TAR_FILE_FOLDER: ".docker"
+        TAR_FILE_NAME: "flask-rest-api.tar"
+        TAR_FILE_PATH: "/"
+    before_script:
+        - mkdir -p "$TAR_FILE_FOLDER"
     script:
-        - docker build -t $IMAGE_NAME:$IMAGE_TAG .
+        - docker build -t "$IMAGE_NAME:$IMAGE_TAG" .
+        - docker save -o "$TAR_FILE_FOLDER""$TAR_FILE_PATH""$TAR_FILE_NAME" "$IMAGE_NAME:$IMAGE_TAG"
     artifacts:
+        expire_in: 10 mins
         paths:
-            - docker_image/
+            - "$TAR_FILE_FOLDER/"
+
 
 run:
     stage: run
@@ -40,10 +48,18 @@ run:
         IMAGE_NAME: harshadat/flask-rest-api
         IMAGE_TAG: python-app-3.0
     script:
-        - docker run -d -p 5005:5000 $IMAGE_NAME:$IMAGE_TAG
-        - sleep 10
-        - apk update # Update the package index
-        - apk add curl
-        - curl http://127.0.0.1:5005/store
+        - docker load -q -i "$TAR_FILE_FOLDER""$TAR_FILE_PATH""$TAR_FILE_NAME"
+        - apk update && apk add --no-cache curl
+        - docker run --name=healthCheckTest -d  --health-cmd='curl -f http://127.0.0.1:5005/store || exit 1'  --health-interval=2s  "$IMAGE_NAME:$IMAGE_TAG"
+        # - sleep 60
+        # - if docker inspect healthCheckTest | jq '.[0].State.Health.Log| last' | grep -q 'UP'; then echo "Health check passed."; else echo "Health check failed."; exit 1; fi
+
+
+
+        # - docker run -d -p 5005:5000 $IMAGE_NAME:$IMAGE_TAG
+        # - sleep 10
+        # - apk update # Update the package index
+        # - apk add curl
+        # - curl http://127.0.0.1:5005/store
 
 
