@@ -50,7 +50,7 @@ run:
         - docker run -d -p 5005:5000 $IMAGE_NAME:$IMAGE_TAG
         # - docker run --name=healthCheckTest -d  --health-cmd='curl -f http://127.0.0.1:5005/store || exit 1'  --health-interval=2s  "$IMAGE_NAME:$IMAGE_TAG"
         - sleep 10
-        - curl http://127.0.0.1:5005/store
+        - curl http://docker:5005/store
         # - if docker inspect healthCheckTest | jq '.[0].State.Health.Log| last' | grep -q 'UP'; then echo "Health check passed."; else echo "Health check failed."; exit 1; fi
 
 
