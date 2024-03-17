@@ -3,6 +3,13 @@ stages:
     - build
     - run
 
+variables:
+    IMAGE_NAME: harshadat/flask-rest-api
+    IMAGE_TAG: python-app-3.0
+    TAR_FILE_FOLDER: ".docker"
+    TAR_FILE_NAME: "flask-rest-api.tar"
+    TAR_FILE_PATH: "/"
+
 .test:
     stage: test
     only:
@@ -21,21 +28,15 @@ build:
         - docker:24.0.5-dind
     variables:
         DOCKER_TLS_CERTDIR: "/certs"
-        IMAGE_NAME: harshadat/flask-rest-api
-        IMAGE_TAG: python-app-3.0
-        TAR_FILE_FOLDER: ".docker"
-        TAR_FILE_NAME: "flask-rest-api.tar"
-        TAR_FILE_PATH: "/"
     before_script:
         - mkdir -p "$TAR_FILE_FOLDER"
     script:
         - docker build -t "$IMAGE_NAME:$IMAGE_TAG" .
         - docker save -o "$TAR_FILE_FOLDER""$TAR_FILE_PATH""$TAR_FILE_NAME" "$IMAGE_NAME:$IMAGE_TAG"
     artifacts:
-        expire_in: 10 mins
+        # expire_in: 10 mins
         paths:
             - "$TAR_FILE_FOLDER/"
-
 
 run:
     stage: run
@@ -44,9 +45,6 @@ run:
         - docker:24.0.5-dind
     dependencies:
         - build
-    variables:
-        IMAGE_NAME: harshadat/flask-rest-api
-        IMAGE_TAG: python-app-3.0
     script:
         - docker load -q -i "$TAR_FILE_FOLDER""$TAR_FILE_PATH""$TAR_FILE_NAME"
         - apk update && apk add --no-cache curl
