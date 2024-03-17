@@ -1,6 +1,7 @@
 stages:
     - test
     - build
+    - run
 
 .test:
     stage: test
@@ -24,15 +25,25 @@ build:
         IMAGE_TAG: python-app-3.0
     script:
         - docker build -t $IMAGE_NAME:$IMAGE_TAG .
+    artifacts:
+        paths:
+            - docker_image/
+
+run:
+    stage: run
+    image: docker:24.0.5
+    services:
+        - docker:24.0.5-dind
+    dependencies:
+        - build
+    variables:
+        IMAGE_NAME: harshadat/flask-rest-api
+        IMAGE_TAG: python-app-3.0
+    script:
         - docker run -d -p 5005:5000 $IMAGE_NAME:$IMAGE_TAG
         - sleep 10
         - apk update # Update the package index
         - apk add curl
-        - curl http://localhost:5005/store
-
-# run:
-#     stage: run
-#     script:
-#         - docker run -d -p 5005:5000 $IMAGE_NAME:$IMAGE_TAG
+        - curl http://127.0.0.1:5005/store
 
 
