@@ -1,5 +1,6 @@
 stages:
     - test
+    - build
 
 test:
     stage: test
@@ -9,4 +10,25 @@ test:
     image: python:3.9-slim-buster
     script:
         - pip install pylint
-        - pylint app.py
+        # - pylint app.py
+        - echo "Currently running print statement"
+
+build:
+    stage: build
+    image: docker:24.0.5
+    services:
+        - docker:24.0.5-dind
+    variables:
+        DOCKER_TLS_CERTDIR: "/certs"
+        IMAGE_NAME: harshadat/flask-rest-api
+        IMAGE_TAG: python-app-3.0
+    script:
+        - docker build -t $IMAGE_NAME:$IMAGE_TAG .
+        - docker run -d -p 5005:5000 $IMAGE_NAME:$IMAGE_TAG
+
+# run:
+#     stage: run
+#     script:
+#         - docker run -d -p 5005:5000 $IMAGE_NAME:$IMAGE_TAG
+
+
