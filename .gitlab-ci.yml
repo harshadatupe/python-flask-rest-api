@@ -1,0 +1,12 @@
+stages:
+    - test
+
+test:
+    stage: test
+    only:
+        - main
+        - feature
+    image: python:3.9-slim-buster
+    script:
+        - pip install pylint
+        - pylint app.py
